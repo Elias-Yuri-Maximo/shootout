@@ -1,5 +1,6 @@
-def main(screen):
-    pass
+import arcade
+from game.director import Director
 
 if __name__ == "__main__":
-    main()
+    app = Director()
+    arcade.run()
