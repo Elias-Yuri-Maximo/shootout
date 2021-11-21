@@ -1,144 +1,148 @@
-from time import sleep
-import arcade
 import random
-from game import constants
-from game.actor import Actor
-from game.enemy_character import EnemyCharacter
-from game.handle_collision import HandleCollision
-from game.bullet import Bullet
-from game.input_service import InputService
-from game.lives import Lives
-from game.output_service import OutputService
-from game.player_character import PlayerCharacter
-from game.point import Point
-from game.score import Score
+import arcade
+import os
+import constants
+from enemy import Enemy
 
-class Director(arcade.Window): 
+from shooter import Shooter
+
+
+file_path = os.path.dirname(os.path.abspath(__file__))
+os.chdir(file_path)
+
+
+class Director(arcade.Window):
     def __init__(self, width, height, title):
 
-        #calll teh parent class constructor
-        super().__init__(self, width, height, title)
-    
-        #counts in which loop to create new enemies in a regular period.
-        #self.loop_counter = []
+        # calll the parent class constructor
+        super().__init__(width, height, title)
 
-        self.enemies_list = arcade.SpriteList()
-        self.clouds_list = arcade.SpriteList()
+        # counts in which loop to create new enemies in a regular period.
+        # self.loop_counter = []
+
         self.all_sprites = arcade.SpriteList()
-
-
-        arcade.schedule(self.add_enemy, 0.25)
-        #Keep playing
+        self.shooter_sprite = None
+        self.enemy_list = None
+        # Keep playing
         self.keep_playing = True
-        
 
-        
     def setup(self):
-        """
-        Sets the window up for playing
+        # Load background image
+        # arcade.set_background_color(arcade.color.YELLOW)
+        self.background = None
+        self.background = arcade.load_texture("images/desert_bg.png")
 
-        Args (self)
-        """
+        # Sprite lists
 
-        #set the background color 'to yellowish'
-        arcade.set_background_color(arcade.color.YELLOW)
+        # Set up the shooter... This will be a cowboy for now.  Might change motif later depending on sprite
+        # availability and game look and feel in terms of shooter rotation rendering
 
-        self.player = arcade.Sprite("images/sun-icon.png", constants.SCALING)
-        self.player.center_y = self.height / 2
-        self.player.left = 10
-        self.all_sprites.append(self.player)
-        
-    def add_enemy(self, delta_time: float):
-        """Adds a new enemy to the screen
+        self.shooter_sprite = Shooter("images/cowboy.png", constants.SCALING)
+        self.enemy_list = arcade.SpriteList()
+        self.shooter_sprite.center_x = 50
+        self.shooter_sprite.center_y = 50
+        self.all_sprites.append(self.shooter_sprite)
 
-        Arguments:
-            delta_time {float} -- How much time has passed since the last call
-        """
+        for i in range(3):
 
-        # First, create the new enemy sprite
-        enemy = arcade.Sprite("images/missile.png", SCALING)
+            # Create the enemy instance...  Western outlaw badguy for now...
+            # This will inherit from the actor class in the next release
 
-        # Set its position to a random height and off screen right
-        enemy.left = random.randint(self.width, self.width + 80)
-        enemy.top = random.randint(10, self.height - 10)
+            enemy = Enemy("images/badguy.png",
+                          constants.SCALING)
 
-        # Set its speed to a random speed heading left
-        enemy.velocity = (random.randint(-20, -5), 0)
+            # set default enemy x, y coordinates
 
-        # Add it to the enemies list
-        self.enemies_list.append(enemy)
-        self.all_sprites.append(enemy)
+            enemy.center_x = random.randrange(constants.SCREEN_WIDTH)
+            enemy.center_y = random.randrange(constants.SCREEN_HEIGHT)
+            enemy.change_x = random.randrange(-3, 4)
+            enemy.change_y = random.randrange(-3, 4)
+
+            # append enemy object to the master list and the enemy specific list
+
+            self.all_sprites.append(enemy)
+            self.enemy_list.append(enemy)
+
+    def on_draw(self):
+
+        arcade.start_render()
+
+        # draw background image
+        arcade.draw_lrwh_rectangle_textured(
+            0, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, self.background)
+        # render environment using arcade magic!
+
+        # render shooter and enemy
+
+        self.all_sprites.draw()
+
+    def on_update(self, delta_time):
+
+        self.all_sprites.update()
+
+    def on_key_press(self, key, modifiers):
+
+        # If the user presses a key, update the speed
+        if key == arcade.key.UP:
+            self.shooter_sprite.change_y = constants.MOVEMENT_SPEED
+        elif key == arcade.key.DOWN:
+            self.shooter_sprite.change_y = -constants.MOVEMENT_SPEED
+        elif key == arcade.key.LEFT:
+            self.shooter_sprite.change_x = -constants.MOVEMENT_SPEED
+        elif key == arcade.key.RIGHT:
+            self.shooter_sprite.change_x = constants.MOVEMENT_SPEED
+
+    def on_key_release(self, key, modifiers):
+
+        # If a shooter releases a key, zero out the speed.
+        # This doesn't work well if multiple keys are pressed.
+        # Use 'better move by keyboard' example if you need to
+        # handle this.
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.shooter_sprite.change_y = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.shooter_sprite.change_x = 0
+
+# Future user mouse movement will control with click/hold/drag.  We will incorporate drag functionality in the next release
+# def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+#        pass
+#    def on_mouse_leave(self, x, y):
+#        pass
+
+# This is how the user mouse movement is aligned with the sprite.  The sprite will follow the mouse movement
+# however the sprite can also be moved by the arrow keys
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.shooter_sprite.center_x = x
+        self.shooter_sprite.center_y = y
+
+# for our initial release, the shooter moves diagonally down/left when left mouse button is pressed
+# shooter moves diagonally up/right when right mouse button is pressed
+# This will change to either rotation for aiming and/or firing bullets and other projectiles in next release
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.shooter_sprite.change_x = -1
+            self.shooter_sprite.change_y = -1
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            self.shooter_sprite.change_x = 1
+            self.shooter_sprite.change_y = 1
+
+# User mouse release will control differnt future sprite movement when we convert to a button hold event in the
+# next release to allow the mouse to drag the sprite around the screen
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.shooter_sprite.change_x = 0
+            self.shooter_sprite.change_y = 0
 
 
+# def main():
+#    window = Director(constants.SCREEN_WIDTH,
+#                      constants.SCREEN_HEIGHT, constants.SCREEN_TITLE)
+#    window.setup()
+#    arcade.run()
 
 
-
-
-  #  def on_draw(self):
-  #      return super().on_draw()
-        
-  #  def on_key_press(self, symbol: int, modifiers: int):
-  #      return super().on_key_press(symbol, modifiers)
-
-def on_update(self, delta_time: float):
-    
-    for enemy in self.enemies_list:
-        if enemy.right < 0:
-            enemy.remove_from_sprite_lists()
-
-    return super().on_update(delta_time)
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    '''
-    def start_game(self):
-        
-
-
-
-
-        while self.keep_playing:
-            self._get_inputs()
-            self._do_updates()
-            self._do_outputs()
-            sleep(constants.FRAME_LENGTH)
-
-    def _get_inputs(self):
-        """Gets the inputs at the beginning of each round of play. In this case,
-        that means getting the desired direction and moving the snake.
-
-        Args:
-        self (Director): An instance of Director.
-        """
-        pass
-
-    def _do_updates(self):
-        """Does the checks to see if someone was hit
-        
-        Args:
-        self (Director): An instance of Director
-        """
-        pass
-
-
-    def _do_outputs(self):
-        """
-        Does the outputs of the game 
-
-        Args: 
-        self (Director): An instance of Director.
-        """
-        pass
-    '''
+# if __name__ == "__main__":
+#    main()
