@@ -26,6 +26,7 @@ class Director(arcade.Window):
         self.bullet_list = None
         self.shooter_sprite = None
         self.enemy_list = None
+        self.shooter_list = None
 
         # the heart list will save all the heart images that represents the lives of the player.
         # when the player looses a live we can remove a heart from the list easily.
@@ -34,6 +35,23 @@ class Director(arcade.Window):
         # Keep playing
         self.keep_playing = True
         self.score = 0
+
+    def initiate_enemy(self):
+        enemy = Enemy("images/badguy.png",
+                            constants.SCALING)
+
+            # set default enemy x, y coordinates
+
+        enemy.center_x = random.randrange(constants.SCREEN_WIDTH)
+        enemy.center_y = random.randrange(constants.SCREEN_HEIGHT)
+        enemy.change_x = random.randrange(-3, 4)
+        enemy.change_y = random.randrange(-3, 4)
+
+                # append enemy object to the master list and the enemy specific list
+
+        self.all_sprites.append(enemy)
+        self.enemy_list.append(enemy)
+
 
     def setup(self):
         # Load background image
@@ -47,32 +65,26 @@ class Director(arcade.Window):
         # availability and game look and feel in terms of shooter rotation rendering
 
         self.shooter_sprite = Shooter("images/cowboy.png", constants.SCALING)
+        self.shooter_list = arcade.SpriteList()
+        self.shooter_list.append(self.shooter_sprite)
+
         self.enemy_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
+        self.shooter_bullet_list= arcade.SpriteList()
         self.shooter_sprite.center_x = 50
         self.shooter_sprite.center_y = 50
+
         self.all_sprites.append(self.shooter_sprite)
+
 
         for i in range(3):
 
             # Create the enemy instance...  Western outlaw badguy for now...
             # This will inherit from the actor class in the next release
 
-            enemy = Enemy("images/badguy.png",
-                          constants.SCALING)
-
-            # set default enemy x, y coordinates
-
-            enemy.center_x = random.randrange(constants.SCREEN_WIDTH)
-            enemy.center_y = random.randrange(constants.SCREEN_HEIGHT)
-            enemy.change_x = random.randrange(-3, 4)
-            enemy.change_y = random.randrange(-3, 4)
-
-            # append enemy object to the master list and the enemy specific list
-
-            self.all_sprites.append(enemy)
-            self.enemy_list.append(enemy)
+            
+            self.initiate_enemy()
 
         # the next for loop will creat three hearts images to print on the screen and save them in the corresponding lists
         for i in range(3):
@@ -149,7 +161,7 @@ class Director(arcade.Window):
         bullet.change_y = math.sin(angle) * constants.BULLET_SPEED
 
         # Add the bullet to the appropriate lists
-        self.bullet_list.append(bullet)
+        self.shooter_bullet_list.append(bullet)
         self.all_sprites.append(bullet)
 
 
@@ -200,8 +212,42 @@ class Director(arcade.Window):
 
         # Get rid of the bullet when it flies off-screen
         for bullet in self.bullet_list:
+
+            hit_list = arcade.check_for_collision_with_list(bullet, self.shooter_list)
+
+            if len(hit_list) > 0:
+
+                heart = self.heart_list[0] 
+                self.heart_list.remove(heart)
+                self.all_sprites.remove(heart)
+
+                bullet.remove_from_sprite_lists()
+
+
             if bullet.top < 0:
                 bullet.remove_from_sprite_lists()
+
+        for bullet in self.shooter_bullet_list:
+
+            hit_list = arcade.check_for_collision_with_list(bullet, self.enemy_list)
+
+            if len(hit_list) > 0: 
+                
+
+                bullet.remove_from_sprite_lists()
+
+                for enemy in hit_list:
+
+                    enemy.remove_from_sprite_lists()
+
+                    
+
+                self.initiate_enemy()
+                self.score+=1
+
+
+                    
+
                 
 
 
