@@ -18,6 +18,9 @@ class Director(arcade.Window):
         # calll the parent class constructor
         super().__init__(width, height, title)
 
+        # Load background image
+        self.background = None
+
         # counts in which loop to create new enemies in a regular period.
         # self.loop_counter = []
         self.frame_count =0
@@ -54,9 +57,8 @@ class Director(arcade.Window):
 
 
     def setup(self):
-        # Load background image
+
         # arcade.set_background_color(arcade.color.YELLOW)
-        self.background = None
         self.background = arcade.load_texture("images/desert_bg.png")
 
         # Sprite lists
@@ -74,8 +76,26 @@ class Director(arcade.Window):
         self.shooter_bullet_list= arcade.SpriteList()
         self.shooter_sprite.center_x = 50
         self.shooter_sprite.center_y = 50
+        # Sounds
+        # Load sounds
+        # Background music: "Uptown" by Topher Mohr and Alex Elena
+        # https://www.youtube.com/watch?v=wTm-WFM0v-g&t=2517s
+        #
+        # In order: Gunshot, Grunt (hurt), Grunt (dead).
+        #
+        self.background_music = arcade.load_sound("sounds/western_bgm.wav")
+        self.gunshot_sound = arcade.load_sound("sounds/gunshot.wav")
+        # future 
+        # self.hurt_sound = arcade.load_sound("sounds/grunt_hurt.wav")
+        # future 
+        # self.dead_sound = arcade.load_sound("sounds/grunt_dead.wav")
 
         self.all_sprites.append(self.shooter_sprite)
+        
+        # In order: Gunshot, Grunt (hurt), Grunt (dead).
+       
+        # Start background music! (Maybe this should be put somewhere else...)
+        arcade.play_sound(self.background_music)
 
 
         for i in range(3):
@@ -163,6 +183,9 @@ class Director(arcade.Window):
         # Add the bullet to the appropriate lists
         self.shooter_bullet_list.append(bullet)
         self.all_sprites.append(bullet)
+
+        # Now that bullet is on screen, play the sound!
+        arcade.play_sound(self.gunshot_sound) 
 
 
     def on_update(self, delta_time):
