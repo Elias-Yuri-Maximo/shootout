@@ -3,6 +3,7 @@ import arcade
 import os
 import constants
 from enemy import Enemy
+import math
 
 from shooter import Shooter
 
@@ -19,8 +20,10 @@ class Director(arcade.Window):
 
         # counts in which loop to create new enemies in a regular period.
         # self.loop_counter = []
+        self.frame_count =0
 
         self.all_sprites = arcade.SpriteList()
+        self.bullet_list = None
         self.shooter_sprite = None
         self.enemy_list = None
 
@@ -46,6 +49,7 @@ class Director(arcade.Window):
         self.shooter_sprite = Shooter("images/cowboy.png", constants.SCALING)
         self.enemy_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
+        self.bullet_list = arcade.SpriteList()
         self.shooter_sprite.center_x = 50
         self.shooter_sprite.center_y = 50
         self.all_sprites.append(self.shooter_sprite)
@@ -108,9 +112,99 @@ class Director(arcade.Window):
         arcade.draw_text(f"Score: {self.score}", 10,
                          570, arcade.color.RED, 20)
 
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        """ Called whenever the mouse button is clicked. """
+
+        # Create a bullet
+        bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", constants.SPRITE_SCALING_LASER)
+
+        # Position the bullet at the player's current location
+        start_x = self.shooter_sprite.center_x
+        start_y = self.shooter_sprite.center_y
+        bullet.center_x = start_x
+        bullet.center_y = start_y
+
+        # Get from the mouse the destination location for the bullet
+        # IMPORTANT! If you have a scrolling screen, you will also need
+        # to add in self.view_bottom and self.view_left.
+        dest_x = x
+        dest_y = y
+
+        # Do math to calculate how to get the bullet to the destination.
+        # Calculation the angle in radians between the start points
+        # and end points. This is the angle the bullet will travel.
+        x_diff = dest_x - start_x
+        y_diff = dest_y - start_y
+        angle = math.atan2(y_diff, x_diff)
+
+        # Angle the bullet sprite so it doesn't look like it is flying
+        # sideways.
+        bullet.angle = math.degrees(angle)
+        print(f"Bullet angle: {bullet.angle:.2f}")
+
+        # Taking into account the angle, calculate our change_x
+        # and change_y. Velocity is how fast the bullet travels.
+        bullet.change_x = math.cos(angle) * constants.BULLET_SPEED
+        bullet.change_y = math.sin(angle) * constants.BULLET_SPEED
+
+        # Add the bullet to the appropriate lists
+        self.bullet_list.append(bullet)
+        self.all_sprites.append(bullet)
+
+
     def on_update(self, delta_time):
 
         self.all_sprites.update()
+
+
+        self.frame_count += 1
+        for enemy in self.enemy_list:
+
+            # First, calculate the angle to the player. We could do this
+            # only when the bullet fires, but in this case we will rotate
+            # the enemy to face the player each frame, so we'll do this
+            # each frame.
+
+            # Position the start at the enemy's current location
+                start_x = enemy.center_x
+                start_y = enemy.center_y
+
+            # Get the destination location for the bullet
+                dest_x = self.shooter_sprite.center_x
+                dest_y = self.shooter_sprite.center_y
+                
+                # Do math to calculate how to get the bullet to the destination.
+                # Calculation the angle in radians between the start points
+                # and end points. This is the angle the bullet will travel.
+
+                x_diff = dest_x - start_x
+                y_diff = dest_y - start_y
+                angle = math.atan2(y_diff, x_diff)
+
+                if self.frame_count % 120 == 0:
+                    bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png")
+                    bullet.center_x = start_x
+                    bullet.center_y = start_y
+
+                    # Angle the bullet sprite
+                    bullet.angle = math.degrees(angle)
+
+                    # Taking into account the angle, calculate our change_x
+                    # and change_y. Velocity is how fast the bullet travels.
+                    bullet.change_x = math.cos(angle) * constants.BULLET_SPEED
+                    bullet.change_y = math.sin(angle) * constants.BULLET_SPEED
+
+                    self.bullet_list.append(bullet)
+                    self.all_sprites.append(bullet)
+
+        # Get rid of the bullet when it flies off-screen
+        for bullet in self.bullet_list:
+            if bullet.top < 0:
+                bullet.remove_from_sprite_lists()
+                
+
+
 
     def on_key_press(self, key, modifiers):
 
@@ -144,29 +238,29 @@ class Director(arcade.Window):
 # This is how the user mouse movement is aligned with the sprite.  The sprite will follow the mouse movement
 # however the sprite can also be moved by the arrow keys
 
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.shooter_sprite.center_x = x
-        self.shooter_sprite.center_y = y
+    #def on_mouse_motion(self, x, y, dx, dy):
+    #    self.shooter_sprite.center_x = x
+    #    self.shooter_sprite.center_y = y
 
 # for our initial release, the shooter moves diagonally down/left when left mouse button is pressed
 # shooter moves diagonally up/right when right mouse button is pressed
 # This will change to either rotation for aiming and/or firing bullets and other projectiles in next release
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            self.shooter_sprite.change_x = -1
-            self.shooter_sprite.change_y = -1
-        if button == arcade.MOUSE_BUTTON_RIGHT:
-            self.shooter_sprite.change_x = 1
-            self.shooter_sprite.change_y = 1
+    #def on_mouse_press(self, x, y, button, modifiers):
+    #    if button == arcade.MOUSE_BUTTON_LEFT:
+    #        self.shooter_sprite.change_x = -1
+    #        self.shooter_sprite.change_y = -1
+    #    if button == arcade.MOUSE_BUTTON_RIGHT:
+    #        self.shooter_sprite.change_x = 1
+    #        self.shooter_sprite.change_y = 1
 
 # User mouse release will control differnt future sprite movement when we convert to a button hold event in the
 # next release to allow the mouse to drag the sprite around the screen
 
-    def on_mouse_release(self, x, y, button, modifiers):
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            self.shooter_sprite.change_x = 0
-            self.shooter_sprite.change_y = 0
+    #def on_mouse_release(self, x, y, button, modifiers):
+    #    if button == arcade.MOUSE_BUTTON_LEFT:
+    #        self.shooter_sprite.change_x = 0
+    #        self.shooter_sprite.change_y = 0
 
 
 # def main():
