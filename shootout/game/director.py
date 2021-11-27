@@ -23,8 +23,14 @@ class Director(arcade.Window):
         self.all_sprites = arcade.SpriteList()
         self.shooter_sprite = None
         self.enemy_list = None
+
+        # the heart list will save all the heart images that represents the lives of the player.
+        # when the player looses a live we can remove a heart from the list easily.
+        self.heart_list = None
+
         # Keep playing
         self.keep_playing = True
+        self.score = 0
 
     def setup(self):
         # Load background image
@@ -39,6 +45,7 @@ class Director(arcade.Window):
 
         self.shooter_sprite = Shooter("images/cowboy.png", constants.SCALING)
         self.enemy_list = arcade.SpriteList()
+        self.heart_list = arcade.SpriteList()
         self.shooter_sprite.center_x = 50
         self.shooter_sprite.center_y = 50
         self.all_sprites.append(self.shooter_sprite)
@@ -63,6 +70,25 @@ class Director(arcade.Window):
             self.all_sprites.append(enemy)
             self.enemy_list.append(enemy)
 
+        # the next for loop will creat three hearts images to print on the screen and save them in the corresponding lists
+        for i in range(3):
+
+            # creating one heart
+            heart = arcade.Sprite("images/heart.png",
+                                  constants.SCALING)
+
+            # set heart x, y coordinates
+            # The heart separation is the separation between the heart images. Each of the hearts will have different x values
+            # "570" is the y value and it is the same value of the Score y to make them be at the same line
+
+            heart.center_x = 700 + constants.HEART_SEPARATION * i
+            heart.center_y = 570
+
+            # append heart object to the master list and the heart specific list
+
+            self.all_sprites.append(heart)
+            self.heart_list.append(heart)
+
     def on_draw(self):
 
         arcade.start_render()
@@ -75,6 +101,12 @@ class Director(arcade.Window):
         # render shooter and enemy
 
         self.all_sprites.draw()
+
+        # create a text at the screen that shows the Score
+        # first parameter = text, second paramenter = x, third parameter = y, fourth parameter = color, fifth parameter = font size
+        # if we want to update the score we can call the "self.score" at the "on_update" function and assign a new number
+        arcade.draw_text(f"Score: {self.score}", 10,
+                         570, arcade.color.RED, 20)
 
     def on_update(self, delta_time):
 
