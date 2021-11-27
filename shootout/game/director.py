@@ -87,7 +87,7 @@ class Director(arcade.Window):
             self.initiate_enemy()
 
         # the next for loop will creat three hearts images to print on the screen and save them in the corresponding lists
-        for i in range(3):
+        for i in range(10):
 
             # creating one heart
             heart = arcade.Sprite("images/heart.png",
@@ -97,7 +97,7 @@ class Director(arcade.Window):
             # The heart separation is the separation between the heart images. Each of the hearts will have different x values
             # "570" is the y value and it is the same value of the Score y to make them be at the same line
 
-            heart.center_x = 700 + constants.HEART_SEPARATION * i
+            heart.center_x = 500 + constants.HEART_SEPARATION * i
             heart.center_y = 570
 
             # append heart object to the master list and the heart specific list
