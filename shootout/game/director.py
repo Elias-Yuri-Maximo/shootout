@@ -83,7 +83,7 @@ class Director(arcade.Window):
         #
         # In order: Gunshot, Grunt (hurt), Grunt (dead).
         #
-        self.background_music = arcade.load_sound("sounds/western_bgm.wav")
+        self.background_music = arcade.load_sound("sounds/western_bgm.mp3")
         self.gunshot_sound = arcade.load_sound("sounds/gunshot.wav")
         # future 
         # self.hurt_sound = arcade.load_sound("sounds/grunt_hurt.wav")
