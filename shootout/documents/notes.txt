@@ -1,0 +1,25 @@
+- It shouldn't just crash when you die
+- Menus
+	- Main menu when you boot up the game with game settings
+		- Bullet speed
+		- Lives
+		- Map size
+		- Music selection
+		- SFX and Music Volume
+	- Pause menu
+	- Death screen with restart options
+
+- High score screen. Enter your name!
+- Clint's bullets should not look the same as the aliens'
+- Display bullet speed on marquee?
+- Higher difficulty means:
+	- Aliens take more hits to kill
+	- Bullets move faster
+	- Bullets ricochet?
+	- More aliens
+	- Map size increases, making everything smaller
+	- Aliens shoot more frequently
+	- Aliens move faster
+
+
+- I don't like how, for example, if you're holding left, then start holding right key, then stop holding right key, you stop moving. Normally you'd resume moving left. Low priority.
