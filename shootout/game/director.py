@@ -4,6 +4,7 @@ import os
 import constants
 from enemy import Enemy
 import math
+from constants import MOVEMENT_SPEED
 
 from shooter import Shooter
 
@@ -30,6 +31,12 @@ class Director(arcade.Window):
         self.shooter_sprite = None
         self.enemy_list = None
         self.shooter_list = None
+
+        # Movement variables. These are new. I want to optimize movement.
+        self.up_pressed = False
+        self.down_pressed = False
+        self.left_pressed = False
+        self.right_pressed = False
 
         # the heart list will save all the heart images that represents the lives of the player.
         # when the player looses a live we can remove a heart from the list easily.
@@ -190,10 +197,32 @@ class Director(arcade.Window):
 
     def on_update(self, delta_time):
 
+        # This block is new, from Noah. Taken from the Python Arcade Library to optimize movement.
+        # https://api.arcade.academy/en/latest/examples/sprite_move_keyboard_better.html
+        
+        # Now, the most recent keypress takes priority over its opposite.
+        # Holding left, then holding right simultaneously, will make you go right.
+        # Releasing right will then make you resume moving left.
+        # This is the kind of movement that I'm used to.
+        self.shooter_sprite.change_y = 0
+        self.shooter_sprite.change_x = 0
+        # Some of the lines below are half commented out.
+        # That's me modifying the example. This way, pressing two opposite directions
+        # will not cause zero movement. Instead, the most recent keypress of the two will take priority.
+        if self.up_pressed:# and not self.down_pressed:
+            self.shooter_sprite.change_y = MOVEMENT_SPEED
+        elif self.down_pressed:# and not self.up_pressed:
+            self.shooter_sprite.change_y = -MOVEMENT_SPEED
+        if self.left_pressed:# and not self.right_pressed:
+            self.shooter_sprite.change_x = -MOVEMENT_SPEED
+        elif self.right_pressed:# and not self.left_pressed:
+            self.shooter_sprite.change_x = MOVEMENT_SPEED
+
+
         self.all_sprites.update()
 
-
         self.frame_count += 1
+
         for enemy in self.enemy_list:
 
             # First, calculate the angle to the player. We could do this
@@ -266,37 +295,42 @@ class Director(arcade.Window):
                     
 
                 self.initiate_enemy()
-                self.score+=1
-
-
-                    
-
-                
+                self.score+=10
 
 
 
     def on_key_press(self, key, modifiers):
 
-        # If the user presses a key, update the speed
+        # If the user presses a key, set the appropriate flag
         if key == arcade.key.UP:
-            self.shooter_sprite.change_y = constants.MOVEMENT_SPEED
+            self.up_pressed = True
         elif key == arcade.key.DOWN:
-            self.shooter_sprite.change_y = -constants.MOVEMENT_SPEED
+            self.down_pressed = True
         elif key == arcade.key.LEFT:
-            self.shooter_sprite.change_x = -constants.MOVEMENT_SPEED
+            self.left_pressed = True
         elif key == arcade.key.RIGHT:
-            self.shooter_sprite.change_x = constants.MOVEMENT_SPEED
+            self.right_pressed = True
 
     def on_key_release(self, key, modifiers):
+
+        if key == arcade.key.UP:
+            self.up_pressed = False
+        elif key == arcade.key.DOWN:
+            self.down_pressed = False
+        elif key == arcade.key.LEFT:
+            self.left_pressed = False
+        elif key == arcade.key.RIGHT:
+            self.right_pressed = False
 
         # If a shooter releases a key, zero out the speed.
         # This doesn't work well if multiple keys are pressed.
         # Use 'better move by keyboard' example if you need to
         # handle this.
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.shooter_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.shooter_sprite.change_x = 0
+        # if key == arcade.key.UP or key == arcade.key.DOWN:
+        #     self.shooter_sprite.change_y = 0
+        # elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        #     self.shooter_sprite.change_x = 0
+
 
 # Future user mouse movement will control with click/hold/drag.  We will incorporate drag functionality in the next release
 # def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
