@@ -48,6 +48,38 @@ class Director(arcade.Window):
         self.keep_playing = True
         self.score = 0
 
+
+ 
+        
+        self.cowboy_textures = []
+        # Load a left facing texture and a right facing texture.
+        # flipped_horizontally=True will mirror the image we load.
+        texture = arcade.load_texture("images/inverted_cowboy.png")
+        self.cowboy_textures.append(texture)
+        texture = arcade.load_texture("images/cowboy.png")
+        self.cowboy_textures.append(texture)
+
+        self.gun_textures = []
+        texture = arcade.load_texture("images/shooter_medium_vertical_guns.png")
+        self.gun_textures.append(texture)
+        texture = arcade.load_texture("images/inverted_shooter_medium_vertical_guns.png")
+        self.gun_textures.append(texture)
+
+
+        # By default, face right.
+        
+        
+
+
+
+
+
+
+
+
+
+
+
     def initiate_enemy(self):
         enemy = Enemy("images/badguy.png",
                             constants.SCALING)
@@ -74,7 +106,7 @@ class Director(arcade.Window):
 
         # Set up the shooter... This will be a cowboy for now.  Might change motif later depending on sprite
         # availability and game look and feel in terms of shooter rotation rendering
-        self.shooter_gun_sprite = Shooter("images/vertical-weapon.png", constants.SCALING)
+        self.shooter_gun_sprite = Shooter("images/shooter_medium_vertical_guns.png", constants.SCALING)
         self.shooter_gun_list = arcade.SpriteList()
         self.shooter_gun_list.append(self.shooter_gun_sprite)
         self.all_sprites.append(self.shooter_gun_sprite)
@@ -218,6 +250,9 @@ class Director(arcade.Window):
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         
+        if x > self.shooter_sprite.center_x:
+            #flip the flippedy thing
+            pass
 
 
         for gun in self.shooter_gun_list:
@@ -245,6 +280,13 @@ class Director(arcade.Window):
 
                 # Set the enemy to face the player.
             gun.angle = math.degrees(angle) - 90
+
+        if x > self.shooter_sprite.center_x:
+            self.shooter_sprite.texture = self.cowboy_textures[1]
+            self.shooter_gun_sprite.texture = self.gun_textures[1]
+        else:
+            self.shooter_sprite.texture = self.cowboy_textures[0]
+            self.shooter_gun_sprite.texture = self.gun_textures[0]
 
 
         return super().on_mouse_motion(x, y, dx, dy)
@@ -323,6 +365,8 @@ class Director(arcade.Window):
 
                 if self.frame_count % 120 == 0:
                     bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png")
+                    #self.enemy_bullet_sound = arcade.load_sound(":resources:sounds/hurt5.wav")
+                    #arcade.play_sound(self.enemy_bullet_soundenemy_bullet_sound)
                     bullet.center_x = start_x
                     bullet.center_y = start_y
 

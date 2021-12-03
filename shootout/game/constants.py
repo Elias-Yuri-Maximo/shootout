@@ -8,3 +8,7 @@ BULLET_SPEED= 4
 
 SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_LASER = 0.7
+
+# Index of textures, first element faces left, second faces right
+TEXTURE_LEFT = 0
+TEXTURE_RIGHT = 1
