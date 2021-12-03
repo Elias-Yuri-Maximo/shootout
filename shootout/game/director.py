@@ -26,8 +26,10 @@ class Director(arcade.Window):
         # self.loop_counter = []
         self.frame_count =0
 
+
         self.all_sprites = arcade.SpriteList()
         self.bullet_list = None
+        self.shooter_gun_list =None
         self.shooter_sprite = None
         self.enemy_list = None
         self.shooter_list = None
@@ -72,10 +74,22 @@ class Director(arcade.Window):
 
         # Set up the shooter... This will be a cowboy for now.  Might change motif later depending on sprite
         # availability and game look and feel in terms of shooter rotation rendering
-
+        self.shooter_gun_sprite = Shooter("images/vertical-weapon.png", constants.SCALING)
+        self.shooter_gun_list = arcade.SpriteList()
+        self.shooter_gun_list.append(self.shooter_gun_sprite)
+        self.all_sprites.append(self.shooter_gun_sprite)
+       
+       
+       
         self.shooter_sprite = Shooter("images/cowboy.png", constants.SCALING)
         self.shooter_list = arcade.SpriteList()
         self.shooter_list.append(self.shooter_sprite)
+
+
+
+
+
+    
 
         self.enemy_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
@@ -151,6 +165,8 @@ class Director(arcade.Window):
         arcade.draw_text(f"Score: {self.score}", 10,
                          570, arcade.color.RED, 20)
 
+        self.shooter_gun_sprite.draw()
+
 
     def on_mouse_press(self, x, y, button, modifiers):
         """ Called whenever the mouse button is clicked. """
@@ -193,6 +209,61 @@ class Director(arcade.Window):
 
         # Now that bullet is on screen, play the sound!
         arcade.play_sound(self.gunshot_sound) 
+        start_x = self.shooter_sprite.center_x
+        start_y = self.shooter_sprite.center_y
+
+
+
+
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        
+
+
+        for gun in self.shooter_gun_list:
+
+            # First, calculate the angle to the player. We could do this
+                # only when the bullet fires, but in this case we will rotate
+                # the enemy to face the player each frame, so we'll do this
+                # each frame.
+            shooter = self.shooter_list[0]
+
+                # Position the start at the enemy's current location
+            start_x = shooter.center_x
+            start_y = shooter.center_y
+
+                # Get the destination location for the bullet
+            dest_x = x
+            dest_y = y
+
+                # Do math to calculate how to get the bullet to the destination.
+                # Calculation the angle in radians between the start points
+                # and end points. This is the angle the bullet will travel.
+            x_diff = dest_x - start_x
+            y_diff = dest_y - start_y
+            angle = math.atan2(y_diff, x_diff)
+
+                # Set the enemy to face the player.
+            gun.angle = math.degrees(angle) - 90
+
+
+        return super().on_mouse_motion(x, y, dx, dy)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def on_update(self, delta_time):
@@ -218,6 +289,10 @@ class Director(arcade.Window):
         elif self.right_pressed:# and not self.left_pressed:
             self.shooter_sprite.change_x = MOVEMENT_SPEED
 
+
+
+        self.shooter_gun_sprite.center_x = self.shooter_sprite.center_x
+        self.shooter_gun_sprite.center_y = self.shooter_sprite.center_y
 
         self.all_sprites.update()
 
