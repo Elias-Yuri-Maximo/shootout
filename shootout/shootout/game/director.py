@@ -5,7 +5,6 @@ import constants
 from enemy import Enemy
 import math
 from constants import MOVEMENT_SPEED, WESTERN_ASSETS, OUTERSPACE_ASSETS, FOREST_ASSETS
-
 from shooter import Shooter
 
 
@@ -13,23 +12,22 @@ file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
 
-class Director(arcade.Window):
-    def __init__(self, width, height, title):
+class Director(arcade.View):
+    def __init__(self, choose):
 
         # calll the parent class constructor
-        super().__init__(width, height, title)
+        super().__init__()
 
         # Load background image
         self.background = None
 
         # counts in which loop to create new enemies in a regular period.
         # self.loop_counter = []
-        self.frame_count =0
-
+        self.frame_count = 0
 
         self.all_sprites = arcade.SpriteList()
         self.bullet_list = None
-        self.shooter_gun_list =None
+        self.shooter_gun_list = None
         self.shooter_sprite = None
         self.enemy_list = None
         self.shooter_list = None
@@ -48,73 +46,76 @@ class Director(arcade.Window):
         self.keep_playing = True
         self.score = 0
 
+        # choosing the scenario textures depending on the user input at the start view
+        self.asset = ""
+        self.scenario = choose
+        if self.scenario == 1:
+            self.asset = constants.FOREST_ASSETS
+        elif self.scenario == 2:
+            self.asset = constants.OUTERSPACE_ASSETS
+        elif self.scenario == 3:
+            self.asset = constants.WESTERN_ASSETS
 
- 
-        
         self.shooter_textures = []
         # Load a left facing texture and a right facing texture.
         # flipped_horizontally=True will mirror the image we load.
-        texture = arcade.load_texture(os.path.join(WESTERN_ASSETS,"inverted_shooter.png"))
+        texture = arcade.load_texture(os.path.join(
+            self.asset, "inverted_shooter.png"))
         self.shooter_textures.append(texture)
-        texture = arcade.load_texture(os.path.join(WESTERN_ASSETS,"shooter.png"))
+        texture = arcade.load_texture(
+            os.path.join(self.asset, "shooter.png"))
         self.shooter_textures.append(texture)
 
         self.gun_textures = []
-        texture = arcade.load_texture(os.path.join(WESTERN_ASSETS,"gun.png"))
+        texture = arcade.load_texture(os.path.join(self.asset, "gun.png"))
         self.gun_textures.append(texture)
-        texture = arcade.load_texture(os.path.join(WESTERN_ASSETS,"inverted_gun.png"))
+        texture = arcade.load_texture(
+            os.path.join(self.asset, "inverted_gun.png"))
         self.gun_textures.append(texture)
-
 
         # By default, face right.
-        
-        
 
     def initiate_enemy(self):
-        enemy = Enemy(os.path.join(WESTERN_ASSETS,"enemy.png"),
-                            constants.SCALING)
+        enemy = Enemy(os.path.join(self.asset, "enemy.png"),
+                      constants.SCALING)
 
-            # set default enemy x, y coordinates
+        # set default enemy x, y coordinates
 
         enemy.center_x = random.randrange(constants.SCREEN_WIDTH)
         enemy.center_y = random.randrange(constants.SCREEN_HEIGHT)
         enemy.change_x = random.randrange(-3, 4)
         enemy.change_y = random.randrange(-3, 4)
 
-                # append enemy object to the master list and the enemy specific list
+        # append enemy object to the master list and the enemy specific list
 
         self.all_sprites.append(enemy)
         self.enemy_list.append(enemy)
 
-
-    def setup(self):
+    def on_show(self):
 
         # arcade.set_background_color(arcade.color.YELLOW)
-        self.background = arcade.load_texture(os.path.join(WESTERN_ASSETS,"background.png"))
+        self.background = arcade.load_texture(
+            os.path.join(self.asset, "background.png"))
 
         # Sprite lists
 
         # Set up the shooter... This will be a cowboy for now.  Might change motif later depending on sprite
         # availability and game look and feel in terms of shooter rotation rendering
-        self.shooter_gun_sprite = Shooter(os.path.join(WESTERN_ASSETS,"gun.png"), constants.SCALING)
+        self.shooter_gun_sprite = Shooter(os.path.join(
+            self.asset, "gun.png"), constants.SCALING)
         self.shooter_gun_list = arcade.SpriteList()
         self.shooter_gun_list.append(self.shooter_gun_sprite)
         self.all_sprites.append(self.shooter_gun_sprite)
-       
-       
-       
-        self.shooter_sprite = Shooter(os.path.join(WESTERN_ASSETS,"shooter.png"), constants.SCALING)
+
+        self.shooter_sprite = Shooter(os.path.join(
+            self.asset, "shooter.png"), constants.SCALING)
         self.shooter_list = arcade.SpriteList()
         self.shooter_list.append(self.shooter_sprite)
-
-
-
-    
 
         self.enemy_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
-        self.shooter_bullet_list= arcade.SpriteList()
+        self.shooter_bullet_list = arcade.SpriteList()
         self.shooter_sprite.center_x = 50
         self.shooter_sprite.center_y = 50
         # Sounds
@@ -126,32 +127,30 @@ class Director(arcade.Window):
         #
         self.background_music = arcade.load_sound("sounds/western_bgm.mp3")
         self.gunshot_sound = arcade.load_sound("sounds/gunshot.wav")
-        # future 
+        # future
         # self.hurt_sound = arcade.load_sound("sounds/grunt_hurt.wav")
-        # future 
+        # future
         # self.dead_sound = arcade.load_sound("sounds/grunt_dead.wav")
 
         self.all_sprites.append(self.shooter_sprite)
-        
+
         # In order: Gunshot, Grunt (hurt), Grunt (dead).
-       
+
         # Start background music! (Maybe this should be put somewhere else...)
         arcade.play_sound(self.background_music)
-
 
         for i in range(3):
 
             # Create the enemy instance...  Western outlaw badguy for now...
             # This will inherit from the actor class in the next release
 
-            
             self.initiate_enemy()
 
         # the next for loop will creat three hearts images to print on the screen and save them in the corresponding lists
         for i in range(10):
 
             # creating one heart
-            heart = arcade.Sprite(os.path.join(WESTERN_ASSETS,"heart.png"),
+            heart = arcade.Sprite(os.path.join(self.asset, "heart.png"),
                                   constants.SCALING)
 
             # set heart x, y coordinates
@@ -187,12 +186,12 @@ class Director(arcade.Window):
 
         self.shooter_gun_sprite.draw()
 
-
     def on_mouse_press(self, x, y, button, modifiers):
         """ Called whenever the mouse button is clicked. """
 
         # Create a bullet
-        bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", constants.SPRITE_SCALING_LASER)
+        bullet = arcade.Sprite(
+            ":resources:images/space_shooter/laserBlue01.png", constants.SPRITE_SCALING_LASER)
 
         # Position the bullet at the player's current location
         start_x = self.shooter_sprite.center_x
@@ -228,45 +227,40 @@ class Director(arcade.Window):
         self.all_sprites.append(bullet)
 
         # Now that bullet is on screen, play the sound!
-        arcade.play_sound(self.gunshot_sound) 
+        arcade.play_sound(self.gunshot_sound)
         start_x = self.shooter_sprite.center_x
         start_y = self.shooter_sprite.center_y
 
-
-
-
-
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        
-        if x > self.shooter_sprite.center_x:
-            #flip the flippedy thing
-            pass
 
+        if x > self.shooter_sprite.center_x:
+            # flip the flippedy thing
+            pass
 
         for gun in self.shooter_gun_list:
 
             # First, calculate the angle to the player. We could do this
-                # only when the bullet fires, but in this case we will rotate
-                # the enemy to face the player each frame, so we'll do this
-                # each frame.
+            # only when the bullet fires, but in this case we will rotate
+            # the enemy to face the player each frame, so we'll do this
+            # each frame.
             shooter = self.shooter_list[0]
 
-                # Position the start at the enemy's current location
+            # Position the start at the enemy's current location
             start_x = shooter.center_x
             start_y = shooter.center_y
 
-                # Get the destination location for the bullet
+            # Get the destination location for the bullet
             dest_x = x
             dest_y = y
 
-                # Do math to calculate how to get the bullet to the destination.
-                # Calculation the angle in radians between the start points
-                # and end points. This is the angle the bullet will travel.
+            # Do math to calculate how to get the bullet to the destination.
+            # Calculation the angle in radians between the start points
+            # and end points. This is the angle the bullet will travel.
             x_diff = dest_x - start_x
             y_diff = dest_y - start_y
             angle = math.atan2(y_diff, x_diff)
 
-                # Set the enemy to face the player.
+            # Set the enemy to face the player.
             gun.angle = math.degrees(angle) - 90
 
         if x > self.shooter_sprite.center_x:
@@ -276,18 +270,13 @@ class Director(arcade.Window):
             self.shooter_sprite.texture = self.shooter_textures[0]
             self.shooter_gun_sprite.texture = self.gun_textures[0]
 
-
         return super().on_mouse_motion(x, y, dx, dy)
-
-
-
-
 
     def on_update(self, delta_time):
 
         # This block is new, from Noah. Taken from the Python Arcade Library to optimize movement.
         # https://api.arcade.academy/en/latest/examples/sprite_move_keyboard_better.html
-        
+
         # Now, the most recent keypress takes priority over its opposite.
         # Holding left, then holding right simultaneously, will make you go right.
         # Releasing right will then make you resume moving left.
@@ -297,16 +286,14 @@ class Director(arcade.Window):
         # Some of the lines below are half commented out.
         # That's me modifying the example. This way, pressing two opposite directions
         # will not cause zero movement. Instead, the most recent keypress of the two will take priority.
-        if self.up_pressed:# and not self.down_pressed:
+        if self.up_pressed:  # and not self.down_pressed:
             self.shooter_sprite.change_y = MOVEMENT_SPEED
-        elif self.down_pressed:# and not self.up_pressed:
+        elif self.down_pressed:  # and not self.up_pressed:
             self.shooter_sprite.change_y = -MOVEMENT_SPEED
-        if self.left_pressed:# and not self.right_pressed:
+        if self.left_pressed:  # and not self.right_pressed:
             self.shooter_sprite.change_x = -MOVEMENT_SPEED
-        elif self.right_pressed:# and not self.left_pressed:
+        elif self.right_pressed:  # and not self.left_pressed:
             self.shooter_sprite.change_x = MOVEMENT_SPEED
-
-
 
         self.shooter_gun_sprite.center_x = self.shooter_sprite.center_x
         self.shooter_gun_sprite.center_y = self.shooter_sprite.center_y
@@ -323,62 +310,63 @@ class Director(arcade.Window):
             # each frame.
 
             # Position the start at the enemy's current location
-                start_x = enemy.center_x
-                start_y = enemy.center_y
+            start_x = enemy.center_x
+            start_y = enemy.center_y
 
             # Get the destination location for the bullet
-                dest_x = self.shooter_sprite.center_x
-                dest_y = self.shooter_sprite.center_y
-                
-                # Do math to calculate how to get the bullet to the destination.
-                # Calculation the angle in radians between the start points
-                # and end points. This is the angle the bullet will travel.
+            dest_x = self.shooter_sprite.center_x
+            dest_y = self.shooter_sprite.center_y
 
-                x_diff = dest_x - start_x
-                y_diff = dest_y - start_y
-                angle = math.atan2(y_diff, x_diff)
+            # Do math to calculate how to get the bullet to the destination.
+            # Calculation the angle in radians between the start points
+            # and end points. This is the angle the bullet will travel.
 
-                if self.frame_count % 120 == 0:
-                    bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png")
-                    #self.enemy_bullet_sound = arcade.load_sound(":resources:sounds/hurt5.wav")
-                    #arcade.play_sound(self.enemy_bullet_soundenemy_bullet_sound)
-                    bullet.center_x = start_x
-                    bullet.center_y = start_y
+            x_diff = dest_x - start_x
+            y_diff = dest_y - start_y
+            angle = math.atan2(y_diff, x_diff)
 
-                    # Angle the bullet sprite
-                    bullet.angle = math.degrees(angle)
+            if self.frame_count % 120 == 0:
+                bullet = arcade.Sprite(
+                    ":resources:images/space_shooter/laserBlue01.png")
+                #self.enemy_bullet_sound = arcade.load_sound(":resources:sounds/hurt5.wav")
+                # arcade.play_sound(self.enemy_bullet_soundenemy_bullet_sound)
+                bullet.center_x = start_x
+                bullet.center_y = start_y
 
-                    # Taking into account the angle, calculate our change_x
-                    # and change_y. Velocity is how fast the bullet travels.
-                    bullet.change_x = math.cos(angle) * constants.BULLET_SPEED
-                    bullet.change_y = math.sin(angle) * constants.BULLET_SPEED
+                # Angle the bullet sprite
+                bullet.angle = math.degrees(angle)
 
-                    self.bullet_list.append(bullet)
-                    self.all_sprites.append(bullet)
+                # Taking into account the angle, calculate our change_x
+                # and change_y. Velocity is how fast the bullet travels.
+                bullet.change_x = math.cos(angle) * constants.BULLET_SPEED
+                bullet.change_y = math.sin(angle) * constants.BULLET_SPEED
+
+                self.bullet_list.append(bullet)
+                self.all_sprites.append(bullet)
 
         # Get rid of the bullet when it flies off-screen
         for bullet in self.bullet_list:
 
-            hit_list = arcade.check_for_collision_with_list(bullet, self.shooter_list)
+            hit_list = arcade.check_for_collision_with_list(
+                bullet, self.shooter_list)
 
             if len(hit_list) > 0:
 
-                heart = self.heart_list[0] 
+                heart = self.heart_list[0]
                 self.heart_list.remove(heart)
                 self.all_sprites.remove(heart)
 
                 bullet.remove_from_sprite_lists()
-
 
             if bullet.top < 0:
                 bullet.remove_from_sprite_lists()
 
         for bullet in self.shooter_bullet_list:
 
-            hit_list = arcade.check_for_collision_with_list(bullet, self.enemy_list)
+            hit_list = arcade.check_for_collision_with_list(
+                bullet, self.enemy_list)
 
-            if len(hit_list) > 0: 
-                
+            if len(hit_list) > 0:
 
                 bullet.remove_from_sprite_lists()
 
@@ -386,12 +374,8 @@ class Director(arcade.Window):
 
                     enemy.remove_from_sprite_lists()
 
-                    
-
                 self.initiate_enemy()
-                self.score+=10
-
-
+                self.score += 10
 
     def on_key_press(self, key, modifiers):
 
@@ -435,7 +419,7 @@ class Director(arcade.Window):
 # This is how the user mouse movement is aligned with the sprite.  The sprite will follow the mouse movement
 # however the sprite can also be moved by the arrow keys
 
-    #def on_mouse_motion(self, x, y, dx, dy):
+    # def on_mouse_motion(self, x, y, dx, dy):
     #    self.shooter_sprite.center_x = x
     #    self.shooter_sprite.center_y = y
 
@@ -443,7 +427,7 @@ class Director(arcade.Window):
 # shooter moves diagonally up/right when right mouse button is pressed
 # This will change to either rotation for aiming and/or firing bullets and other projectiles in next release
 
-    #def on_mouse_press(self, x, y, button, modifiers):
+    # def on_mouse_press(self, x, y, button, modifiers):
     #    if button == arcade.MOUSE_BUTTON_LEFT:
     #        self.shooter_sprite.change_x = -1
     #        self.shooter_sprite.change_y = -1
@@ -454,7 +438,7 @@ class Director(arcade.Window):
 # User mouse release will control differnt future sprite movement when we convert to a button hold event in the
 # next release to allow the mouse to drag the sprite around the screen
 
-    #def on_mouse_release(self, x, y, button, modifiers):
+    # def on_mouse_release(self, x, y, button, modifiers):
     #    if button == arcade.MOUSE_BUTTON_LEFT:
     #        self.shooter_sprite.change_x = 0
     #        self.shooter_sprite.change_y = 0
