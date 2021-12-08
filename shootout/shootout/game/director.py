@@ -351,11 +351,12 @@ class Director(arcade.View):
                 bullet, self.shooter_list)
 
             if len(hit_list) > 0:
-
-                heart = self.heart_list[0]
-                self.heart_list.remove(heart)
-                self.all_sprites.remove(heart)
-
+                if len(self.heart_list) > 0:
+                    heart = self.heart_list[0]
+                    self.heart_list.remove(heart)
+                    self.all_sprites.remove(heart)
+                else:
+                    exit()
                 bullet.remove_from_sprite_lists()
 
             if bullet.top < 0:
