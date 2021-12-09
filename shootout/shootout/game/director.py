@@ -6,6 +6,7 @@ from enemy import Enemy
 import math
 from constants import MOVEMENT_SPEED, WESTERN_ASSETS, OUTERSPACE_ASSETS, FOREST_ASSETS
 from shooter import Shooter
+from final import Final
 
 
 file_path = os.path.dirname(os.path.abspath(__file__))
@@ -31,7 +32,7 @@ class Director(arcade.View):
         self.shooter_sprite = None
         self.enemy_list = None
         self.shooter_list = None
-
+        self.sound = None
         # Movement variables. These are new. I want to optimize movement.
         self.up_pressed = False
         self.down_pressed = False
@@ -137,7 +138,8 @@ class Director(arcade.View):
         # In order: Gunshot, Grunt (hurt), Grunt (dead).
 
         # Start background music! (Maybe this should be put somewhere else...)
-        arcade.play_sound(self.background_music)
+        self.sound = arcade.play_sound(self.background_music)
+        self.sound.play()
 
         for i in range(3):
 
@@ -215,7 +217,7 @@ class Director(arcade.View):
         # Angle the bullet sprite so it doesn't look like it is flying
         # sideways.
         bullet.angle = math.degrees(angle)
-        print(f"Bullet angle: {bullet.angle:.2f}")
+        #print(f"Bullet angle: {bullet.angle:.2f}")
 
         # Taking into account the angle, calculate our change_x
         # and change_y. Velocity is how fast the bullet travels.
@@ -356,7 +358,9 @@ class Director(arcade.View):
                     self.heart_list.remove(heart)
                     self.all_sprites.remove(heart)
                 else:
-                    exit()
+                    arcade.stop_sound(self.sound)
+                    game_view = Final(self.score)
+                    self.window.show_view(game_view)
                 bullet.remove_from_sprite_lists()
 
             if bullet.top < 0:
