@@ -11,7 +11,8 @@ from director import Director
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
-
+# Inherits from the arcade.View class
+# Initializes menu and opening splash screen with game instructions 
 class Start(arcade.View):
     def __init__(self):
 

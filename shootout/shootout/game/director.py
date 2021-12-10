@@ -12,6 +12,10 @@ from final import Final
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
+# Director class orchestrates the Arcade activity.  Director loads the sprites and creates the sprite classes.
+# Director also coordinates the game loop inherent to Arcade and does all updates. The game is divided into Arcade views
+# We initialize and declare game objects for presentation in the Arcade window views.
+# Inherits from arcdade.View class
 
 class Director(arcade.View):
     def __init__(self, choose):
@@ -76,7 +80,11 @@ class Director(arcade.View):
 
         # By default, face right.
 
+    # Initate_enemy sprites
+    # Args: self 
     def initiate_enemy(self):
+
+        # Initate enemy sprite and places sprite at random screen location
         enemy = Enemy(os.path.join(self.asset, "enemy.png"),
                       constants.SCALING)
 
@@ -92,6 +100,10 @@ class Director(arcade.View):
         self.all_sprites.append(enemy)
         self.enemy_list.append(enemy)
 
+    # on_show function set's up initial game view including textures background.png is a generic background which changes due
+    # to the assets/<theme> directory structure.  Here is where we load the game sprites and set the default positions. 
+    # Args: self 
+
     def on_show(self):
 
         # arcade.set_background_color(arcade.color.YELLOW)
@@ -100,10 +112,8 @@ class Director(arcade.View):
 
         # Sprite lists
 
-        # Set up the shooter... This will be a cowboy for now.  Might change motif later depending on sprite
-        # availability and game look and feel in terms of shooter rotation rendering
-        self.shooter_gun_sprite = Shooter(os.path.join(
-            self.asset, "gun.png"), constants.SCALING)
+        # Set up the shooter... This will be a cowboy for the western theme and chubaka for the forest and space themes.
+        self.shooter_gun_sprite = Shooter(os.path.join( self.asset, "gun.png"), constants.SCALING)
         self.shooter_gun_list = arcade.SpriteList()
         self.shooter_gun_list.append(self.shooter_gun_sprite)
         self.all_sprites.append(self.shooter_gun_sprite)
@@ -124,15 +134,10 @@ class Director(arcade.View):
         # Background music: "Uptown" by Topher Mohr and Alex Elena
         # https://www.youtube.com/watch?v=wTm-WFM0v-g&t=2517s
         #
-        # In order: Gunshot, Grunt (hurt), Grunt (dead).
+        #  Gunshot from gunshot.wav file
         #
         self.background_music = arcade.load_sound("sounds/western_bgm.mp3")
         self.gunshot_sound = arcade.load_sound("sounds/gunshot.wav")
-        # future
-        # self.hurt_sound = arcade.load_sound("sounds/grunt_hurt.wav")
-        # future
-        # self.dead_sound = arcade.load_sound("sounds/grunt_dead.wav")
-
         self.all_sprites.append(self.shooter_sprite)
 
         # In order: Gunshot, Grunt (hurt), Grunt (dead).
@@ -167,6 +172,7 @@ class Director(arcade.View):
             self.all_sprites.append(heart)
             self.heart_list.append(heart)
 
+    # Args: self 
     def on_draw(self):
 
         arcade.start_render()
@@ -188,8 +194,9 @@ class Director(arcade.View):
 
         self.shooter_gun_sprite.draw()
 
+    # Args: self 
     def on_mouse_press(self, x, y, button, modifiers):
-        """ Called whenever the mouse button is clicked. """
+        #Called whenever the mouse button is clicked.
 
         # Create a bullet
         bullet = arcade.Sprite(
@@ -233,6 +240,7 @@ class Director(arcade.View):
         start_x = self.shooter_sprite.center_x
         start_y = self.shooter_sprite.center_y
 
+    # Args: self, initial x,y mouse position, delta x and delta y are relative mouse distances
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
 
         if x > self.shooter_sprite.center_x:
@@ -264,7 +272,7 @@ class Director(arcade.View):
 
             # Set the enemy to face the player.
             gun.angle = math.degrees(angle) - 90
-
+        # chooses the correct texture for player and weapon based upon mouse position
         if x > self.shooter_sprite.center_x:
             self.shooter_sprite.texture = self.shooter_textures[1]
             self.shooter_gun_sprite.texture = self.gun_textures[1]
@@ -366,6 +374,7 @@ class Director(arcade.View):
             if bullet.top < 0:
                 bullet.remove_from_sprite_lists()
 
+        # Update hit list based upon collisions.  Deletes a heart(lives) if shooter is hit by bullet 
         for bullet in self.shooter_bullet_list:
 
             hit_list = arcade.check_for_collision_with_list(
@@ -381,7 +390,7 @@ class Director(arcade.View):
 
                 self.initiate_enemy()
                 self.score += 10
-
+    # Keyboard controls for key press
     def on_key_press(self, key, modifiers):
 
         # If the user presses a key, set the appropriate flag
@@ -393,7 +402,7 @@ class Director(arcade.View):
             self.left_pressed = True
         elif key == arcade.key.RIGHT:
             self.right_pressed = True
-
+    # Keyboard contros for key release
     def on_key_release(self, key, modifiers):
 
         if key == arcade.key.UP:
@@ -405,7 +414,7 @@ class Director(arcade.View):
         elif key == arcade.key.RIGHT:
             self.right_pressed = False
 
-        # If a shooter releases a key, zero out the speed.
+        # Future Release Candidate....If a shooter releases a key, zero out the speed.
         # This doesn't work well if multiple keys are pressed.
         # Use 'better move by keyboard' example if you need to
         # handle this.
@@ -414,47 +423,3 @@ class Director(arcade.View):
         # elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
         #     self.shooter_sprite.change_x = 0
 
-
-# Future user mouse movement will control with click/hold/drag.  We will incorporate drag functionality in the next release
-# def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-#        pass
-#    def on_mouse_leave(self, x, y):
-#        pass
-
-# This is how the user mouse movement is aligned with the sprite.  The sprite will follow the mouse movement
-# however the sprite can also be moved by the arrow keys
-
-    # def on_mouse_motion(self, x, y, dx, dy):
-    #    self.shooter_sprite.center_x = x
-    #    self.shooter_sprite.center_y = y
-
-# for our initial release, the shooter moves diagonally down/left when left mouse button is pressed
-# shooter moves diagonally up/right when right mouse button is pressed
-# This will change to either rotation for aiming and/or firing bullets and other projectiles in next release
-
-    # def on_mouse_press(self, x, y, button, modifiers):
-    #    if button == arcade.MOUSE_BUTTON_LEFT:
-    #        self.shooter_sprite.change_x = -1
-    #        self.shooter_sprite.change_y = -1
-    #    if button == arcade.MOUSE_BUTTON_RIGHT:
-    #        self.shooter_sprite.change_x = 1
-    #        self.shooter_sprite.change_y = 1
-
-# User mouse release will control differnt future sprite movement when we convert to a button hold event in the
-# next release to allow the mouse to drag the sprite around the screen
-
-    # def on_mouse_release(self, x, y, button, modifiers):
-    #    if button == arcade.MOUSE_BUTTON_LEFT:
-    #        self.shooter_sprite.change_x = 0
-    #        self.shooter_sprite.change_y = 0
-
-
-# def main():
-#    window = Director(constants.SCREEN_WIDTH,
-#                      constants.SCREEN_HEIGHT, constants.SCREEN_TITLE)
-#    window.setup()
-#    arcade.run()
-
-
-# if __name__ == "__main__":
-#    main()
