@@ -2,6 +2,7 @@ import arcade
 import constants
 
 
+# Inherits from arcade.Sprite class
 class Shooter(arcade.Sprite):
 
     def update(self):

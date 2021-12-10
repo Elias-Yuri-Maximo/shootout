@@ -8,7 +8,8 @@ import constants
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
-
+# Inherits from arcade.View class
+# This class render's the final exit screen at the end of the game and draws the final score in the heading 
 class Final(arcade.View):
     def __init__(self, score):
 
@@ -24,11 +25,11 @@ class Final(arcade.View):
         self.score = score
 
     def on_show(self):
-        # giving the image to the instuctions page
+        # provides image to the final splash page
         self.background = arcade.load_texture("images/menu/final.jpg")
 
     def on_draw(self):
-        # starting rendering the game
+        # refresh game view
         arcade.start_render()
 
         arcade.draw_lrwh_rectangle_textured(
